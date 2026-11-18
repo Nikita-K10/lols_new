@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История пользователей</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f3f3f0;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            color: #334155;
+            padding: 40px 20px;
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 40px 32px;
+            border-radius: 20px;
+            box-shadow:
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 8px 10px -6px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            width: 100%;
+            max-width: 640px;
+        }
+
+        .history-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .history-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .history-header p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1.5px solid #e2e8f0;
+        }
+
+        tbody td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+        }
+
+        tbody tr:hover td {
+            background: #f8fafc;
+        }
+
+        td.balance {
+            font-weight: 600;
+            color: #4f46e5;
+            white-space: nowrap;
+        }
+
+        td.time {
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 32px 12px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .switch-link {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .switch-link a {
+            color: #6366f1;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .switch-link a:hover {
+            color: #4f46e5;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="history-card">
+        <div class="history-header">
+            <h2>Пользователи системы</h2>
+            <p>ID, имя, баланс и время регистрации</p>
+        </div>
+
+        {% if users %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Имя</th>
+                    <th>Баланс</th>
+                    <th>Регистрация</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>{{ u.id }}</td>
+                    <td>{{ u.username }}</td>
+                    <td class="balance">{{ u.balance }} ₽</td>
+                    <td class="time">{{ u.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty">Пока нет зарегистрированных пользователей.</div>
+        {% endif %}
+
+        <div class="switch-link">
+            <a href="/lk">← Вернуться в личный кабинет</a>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f3f3f0;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #334155;
+            padding: 20px;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .cabinet-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 40px 32px;
+            border-radius: 20px;
+            box-shadow:
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 8px 10px -6px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            width: 100%;
+            max-width: 440px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* ===== ЧАТ С НЕЙРОСЕТЬЮ ===== */
+        .chat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow:
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 8px 10px -6px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            height: 620px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+        }
+
+        .chat-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .chat-header span {
+            font-size: 12px;
+            color: #64748b;
+            margin-left: auto;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            animation: msg-in 0.25s ease;
+        }
+
+        @keyframes msg-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-msg.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-msg.bot {
+            align-self: flex-start;
+            background: #f1f5f9;
+            color: #1e293b;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-msg.bot.error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .chat-typing {
+            align-self: flex-start;
+            display: none;
+            padding: 12px 16px;
+            margin-left: 20px;
+            margin-bottom: 12px;
+            background: #f1f5f9;
+            border-radius: 14px;
+            border-bottom-left-radius: 4px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .chat-input-row {
+            padding: 14px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-row input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input-row input:focus {
+            background-color: #ffffff;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        .chat-send-btn {
+            width: 46px;
+            height: 46px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .chat-send-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            transform: translateY(-1px);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .chat-send-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .cabinet-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .cabinet-header .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .cabinet-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .cabinet-header p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* Стиль для статичных значений (вместо input) */
+        .static-value {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            word-break: break-word;
+        }
+
+        .balance-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%);
+            border: 1.5px solid rgba(99, 102, 241, 0.2);
+            margin-bottom: 24px;
+        }
+
+        .balance-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .balance-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .balance-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .balance-value .currency {
+            font-size: 15px;
+            font-weight: 600;
+            color: #6366f1;
+            margin-left: 4px;
+        }
+
+        .balance-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(99, 102, 241, 0.12);
+        }
+
+        .balance-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: #6366f1;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
+        }
+
+        .switch-link {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .switch-link a {
+            color: #6366f1;
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 4px;
+            transition: color 0.2s ease;
+        }
+
+        .switch-link a:hover {
+            color: #4f46e5;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cabinet-card">
+        <div class="cabinet-header">
+            <div class="avatar">ИИ</div>
+            <h2>Личный кабинет</h2>
+            <p>Управляйте своим профилем и балансом</p>
+        </div>
+
+        <!-- Имя пользователя (значение из кода) -->
+        <div class="form-group">
+            <label>Имя пользователя</label>
+            <div class="static-value">{{ user.username }}</div>
+        </div>
+
+        <!-- Email (значение из кода) -->
+        <div class="form-group">
+            <label>Email</label>
+            <div class="static-value">{{ user.email or 'Пока нет' }}</div>
+        </div>
+
+        <!-- Баланс (значение из кода) -->
+        <div class="balance-card">
+            <div class="balance-info">
+                <span class="balance-label">Текущий баланс</span>
+                <span class="balance-value" id="balance-value">{{ user.balance }}<span class="currency">₽</span></span>
+
+            </div>
+            <div class="balance-icon">
+                <svg viewBox="0 0 24 24">
+                    <rect x="2" y="6" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M2 10h20"></path>
+                    <circle cx="17" cy="15" r="1.5" fill="#6366f1" stroke="none"></circle>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Кнопка пополнения -->
+        <!-- Пополнение баланса -->
+        <div class="form-group">
+            <label for="topup-amount">Сумма пополнения</label>
+            <div class="input-wrapper">
+                <input type="number" id="topup-amount" placeholder="100" min="1" max="100000" step="1" inputmode="numeric">
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="topup-btn" style="margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </button>
+
+    <!-- ===== ЧАТ С НЕЙРОСЕТЬЮ ===== -->
+    <div class="chat-card">
+        <div class="chat-header">
+            <div class="chat-status-dot"></div>
+            <h3>AI Ассистент</h3>
+            <span>1 сообщение = 3 ₽</span>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-msg bot">Привет! Я нейросеть-ассистент. Одно сообщение стоит 3 ₽ — оно спишется с твоего баланса 🙂</div>
+        </div>
+
+        <div class="chat-typing" id="chatTyping">Нейросеть печатает...</div>
+
+        <div class="chat-input-row">
+            <input type="text" id="chatInput" placeholder="Напишите сообщение..." maxlength="1000">
+            <button type="button" class="chat-send-btn" id="chatSendBtn" title="Отправить (−3 ₽)">
+                <svg viewBox="0 0 24 24">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const messagesBox = document.getElementById('chatMessages');
+            const input = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('chatSendBtn');
+            const typing = document.getElementById('chatTyping');
+            const balanceValue = document.getElementById('balance-value');
+
+            let balance = parseInt('{{ user.balance }}', 10);
+
+            function renderBalance() {
+                balanceValue.innerHTML = balance + '<span class="currency">₽</span>';
+            }
+
+            function addMessage(text, who, isError) {
+                const div = document.createElement('div');
+                div.className = 'chat-msg ' + who + (isError ? ' error' : '');
+                div.textContent = text; // textContent защищает от вставки HTML
+                messagesBox.appendChild(div);
+                messagesBox.scrollTop = messagesBox.scrollHeight;
+            }
+
+            async function sendMessage() {
+                const text = input.value.trim();
+                if (!text || sendBtn.disabled) return;
+
+                if (balance < 3) {
+                    addMessage('Недостаточно средств: сообщение стоит 3 ₽. Пополните баланс в кабинете.', 'bot', true);
+                    return;
+                }
+
+                addMessage(text, 'user');
+                input.value = '';
+                sendBtn.disabled = true;
+                input.disabled = true;
+                typing.style.display = 'block';
+                messagesBox.scrollTop = messagesBox.scrollHeight;
+
+                try {
+                    // 1. Списываем 3 рубля через /make_request
+                    const pay = await fetch('/make_request', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const payData = await pay.json();
+
+                    if (!pay.ok || !payData.result) {
+                        addMessage(payData.error || 'Не удалось списать средства.', 'bot', true);
+                        return;
+                    }
+
+                    balance = payData.new_balance;
+                    renderBalance();
+
+                    // 2. Отправляем сообщение нейросети
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: text })
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.reply) {
+                        addMessage(data.reply, 'bot');
+                    } else {
+                        addMessage(data.error || 'Не удалось получить ответ. Попробуйте ещё раз.', 'bot', true);
+                    }
+                } catch (err) {
+                    addMessage('Ошибка соединения с сервером.', 'bot', true);
+                } finally {
+                    typing.style.display = 'none';
+                    sendBtn.disabled = false;
+                    input.disabled = false;
+                    input.focus();
+                }
+            }
+
+            sendBtn.addEventListener('click', sendMessage);
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        })();
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="../static/script.js"></script>
+    <script>
+        (function () {
+            const topupBtn = document.getElementById('topup-btn');
+            const balanceValue = document.getElementById('balance-value');
+            let balance = parseInt('{{ user.balance }}', 10) || 0;
+
+            function renderBalance() {
+                balanceValue.innerHTML = balance + '<span class="currency">₽</span>';
+            }
+
+            topupBtn.addEventListener('click', async function () {
+                topupBtn.disabled = true;
+                try {
+                    const response = await fetch('/topup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.result) {
+                        balance = data.new_balance;
+                        renderBalance();
+                    } else {
+                        alert(data.error || 'Не удалось пополнить баланс');
+                    }
+                } catch (err) {
+                    alert('Ошибка соединения с сервером');
+                } finally {
+                    topupBtn.disabled = false;
+                }
+            });
+        })();
+    </script>
+
+</body>
+</html>
